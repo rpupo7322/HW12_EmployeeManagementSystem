@@ -234,7 +234,7 @@ const addEmployee = () => {
             },
             (err) => {
               if (err) throw err;
-              console.log("employee added successfully!");
+              console.log("new employee added!");
               init();
             }
           );
@@ -242,6 +242,77 @@ const addEmployee = () => {
     });
   });
 };
+
+const addDepartment = () => {
+    inquirer
+      .prompt([
+        {
+          type: "input",
+          message: "What department would you like to add?",
+          name: "newDepartment",
+        },
+      ])
+      .then((answer) => {
+        connection.query(
+          "INSERT INTO department SET ?",
+          {
+            name: answer.newDepartment,
+          },
+          (err) => {
+            if (err) throw err;
+            console.log("New department added");
+            init();
+          }
+        );
+      });
+  };
+
+  const addRole = () => {
+    connection.query("SELECT * FROM department", (err, results) => {
+        if (err) throw err;
+        const allDepartments = results.map(function (department) {
+          return {
+            value: department.id,
+            name: department.title,
+          };
+        });
+        inquirer
+          .prompt([
+            {
+              type: "input",
+              message: "What is the title of the new role?",
+              name: "title",
+            },
+            {
+              type: "input",
+              message: "What is the salary of the new role?",
+              name: "salary",
+            },
+          
+            {
+              type: "list",
+              message: "What is the department for this role?",
+              name: "department",
+              choices: allDepartments,
+            },
+          ])
+          .then((answer) => {
+            connection.query(
+              "INSERT INTO role SET ?",
+              {
+                title: answer.title,
+                salary: answer.salary,
+                department_id: answer.department,
+              },
+              (err) => {
+                if (err) throw err;
+                console.log("new role added!");
+                init();
+              }
+            );
+          });
+      });
+  };
 
 init = () => {
     inquirer.prompt(questions).then((answer) => {
@@ -263,6 +334,12 @@ init = () => {
             break;
             case "employeeAdd":
                 addEmployee();
+            break;
+            case "roleAdd":
+                addRole();
+            break;
+            case "departmentAdd":
+                addDepartment();
             break;
             case "QUIT":
                 process.exit();

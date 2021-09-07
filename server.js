@@ -273,7 +273,7 @@ const addDepartment = () => {
         const allDepartments = results.map(function (department) {
           return {
             value: department.id,
-            name: department.title,
+            name: department.name,
           };
         });
         inquirer
@@ -421,6 +421,63 @@ const removeDepartment = () => {
     })
 }
 
+
+const updateEmployeeRole = () => {
+    connection.query("SELECT * FROM role", (err, results) => {
+      if (err) throw err;
+      const allRoles = results.map(function (role) {
+        return {
+          value: role.id,
+          name: role.title,
+        };
+      });
+      connection.query("SELECT * FROM employee", (err, results) => {
+        if (err) throw err;
+        const allEmployees = results.map(function (employee) {
+          return {
+            value: employee.id,
+            name: employee.first_name + ' ' + employee.last_name,
+          };
+        });
+      inquirer
+        .prompt([
+        {
+            type: "list",
+            message: "Which employee would you like to update?",
+            name: "employee",
+            choices: allEmployees,
+            },
+            {
+            type: "list",
+            message: "What role would you like to give this employee?",
+            name: "role",
+            choices: allRoles,
+          },
+ 
+        ])
+        .then((answer) => {
+          connection.query(
+            "UPDATE employee set ? WHERE ?",
+            [
+                {
+                  role_id: answer.role,
+                },
+                {
+                  id: answer.employee,
+                }
+              ],
+            (err) => {
+              if (err) throw err;
+              console.log("employee updated");
+              init();
+            }
+          );
+        });
+    });
+  });
+};
+
+
 init = () => {
     inquirer.prompt(questions).then((answer) => {
         switch (answer.entryQuestion) {
@@ -457,8 +514,11 @@ init = () => {
             case "departmentRemove":
                 removeDepartment();
             break;
+            case "employeeUpdate":
+                updateEmployeeRole();
+            break;
             case "QUIT":
-                process.exit();
+                connection.end();
             break;
     }
 })};

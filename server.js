@@ -517,7 +517,7 @@ init = () => {
             case "employeeUpdate":
                 updateEmployeeRole();
             break;
-            case "QUIT":
+            case "quit":
                 connection.end();
             break;
     }

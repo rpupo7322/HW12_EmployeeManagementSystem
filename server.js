@@ -1,7 +1,7 @@
 const consoleTable = require("console.table");
 const inquirer = require("inquirer");
 const mysql = require("mysql");
-// const query = require('./libraries/queries');
+
 
 const connection = mysql.createConnection({
   host: "localhost",
@@ -181,6 +181,67 @@ const viewDepartments = () => {
     }
   )
 };
+const addEmployee = () => {
+    connection.query("SELECT * FROM role", (err, results) => {
+      if (err) throw err;
+      const allRoles = results.map(function (role) {
+        return {
+          value: role.id,
+          name: role.title,
+        };
+      });
+      connection.query("SELECT * FROM employee", (err, results) => {
+        if (err) throw err;
+        const allManagers = results.map(function (manager) {
+          return {
+            value: manager.id,
+            name: manager.first_name + ' ' + manager.last_name,
+          };
+        });
+      inquirer
+        .prompt([
+          {
+            type: "input",
+            message: "What is the employee's first name?",
+            name: "firstName",
+          },
+          {
+            type: "input",
+            message: "What is the employee's last name?",
+            name: "lastName",
+          },
+          {
+            type: "list",
+            message: "What is the employee's job role?",
+            name: "role",
+            choices: allRoles,
+          },
+          {
+            type: "list",
+            message: "What is the employee's manager?",
+            name: "manager",
+            choices: allManagers,
+          },
+        ])
+        .then((answer) => {
+          connection.query(
+            "INSERT INTO employee SET ?",
+            {
+              first_name: answer.firstName,
+              last_name: answer.lastName,
+              role_id: answer.role,
+              manager_id: answer.manager,
+            },
+            (err) => {
+              if (err) throw err;
+              console.log("employee added successfully!");
+              init();
+            }
+          );
+        });
+    });
+  });
+};
 
 init = () => {
     inquirer.prompt(questions).then((answer) => {
@@ -199,6 +260,12 @@ init = () => {
             break;
             case "departmentView":
                 viewDepartments();
+            break;
+            case "employeeAdd":
+                addEmployee();
+            break;
+            case "QUIT":
+                process.exit();
             break;
     }
 })};

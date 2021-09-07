@@ -314,6 +314,113 @@ const addDepartment = () => {
       });
   };
 
+const removeEmployee = () => {
+    connection.query("SELECT * FROM employee", (err, results) => {
+        if (err) throw err;
+        const allEmployees = results.map(function (employee) {
+          return {
+            value: employee.id,
+            name: employee.first_name + ' ' + employee.last_name,
+          };
+        });
+        inquirer
+          .prompt([
+
+            {
+              type: "list",
+              message: "Which employee would you like to remove?",
+              name: "employee",
+              choices: allEmployees,
+            },
+          ])
+          .then((answer) => {
+            const removeEmployee = "DELETE FROM employee WHERE ?";
+            connection.query(removeEmployee,
+                [
+                    {
+                        id: answer.employee,
+                    },
+                ],
+                (err) => {
+                    if (err) throw err;
+                    console.log('Employee removed');
+                    init();
+                })
+        })
+    })
+}
+
+
+const removeRole = () => {
+    connection.query("SELECT * FROM role", (err, results) => {
+        if (err) throw err;
+        const allRoles = results.map(function (role) {
+          return {
+            value: role.id,
+            name: role.title,
+          };
+        });
+        inquirer
+          .prompt([
+            {
+              type: "list",
+              message: "Which role would you like to remove?",
+              name: "role",
+              choices: allRoles,
+            },
+          ])
+          .then((answer) => {
+            const removeRole = "DELETE FROM role WHERE ?";
+            connection.query(removeRole,
+                [
+                    {
+                        id: answer.role,
+                    },
+                ],
+                (err) => {
+                    if (err) throw err;
+                    console.log('Role removed');
+                    init();
+                })
+        })
+    })
+}
+
+const removeDepartment = () => {
+    connection.query("SELECT * FROM department", (err, results) => {
+        if (err) throw err;
+        const allDepartments = results.map(function (department) {
+          return {
+            value: department.id,
+            name: department.name,
+          };
+        });
+        inquirer
+          .prompt([
+            {
+              type: "list",
+              message: "Which department would you like to remove?",
+              name: "department",
+              choices: allDepartments,
+            },
+          ])
+          .then((answer) => {
+            const removeDepartment = "DELETE FROM department WHERE ?";
+            connection.query(removeDepartment,
+                [
+                    {
+                        id: answer.department,
+                    },
+                ],
+                (err) => {
+                    if (err) throw err;
+                    console.log('department removed');
+                    init();
+                })
+        })
+    })
+}
+
 init = () => {
     inquirer.prompt(questions).then((answer) => {
         switch (answer.entryQuestion) {
@@ -340,6 +447,15 @@ init = () => {
             break;
             case "departmentAdd":
                 addDepartment();
+            break;
+            case "employeeRemove":
+                removeEmployee();
+            break;
+            case "roleRemove":
+                removeRole();
+            break;
+            case "departmentRemove":
+                removeDepartment();
             break;
             case "QUIT":
                 process.exit();
